@@ -88,11 +88,18 @@ function animator(holeIndex, startFrame, endFrame) {
 		return animated = false;
 	}
 }
+function onTap(id) {
+	attack(id);
+}
 
 document.addEventListener('keydown', function(e) {
 	let key = e.key;
-	let keyMap = [7, 8, 9, 4, 5, 6, 1, 2, 3];
-	if((key == keyMap[rand]) && !isPressed) {
+	let keyMap = [6, 7, 8, 3, 4, 5, 0, 1, 2];
+	attack(keyMap[key - 1]);
+	
+});
+function attack(index) {
+	if((index == rand) && !isPressed) {
 		isPressed = true;
 		hit(rand);
 		repeatTimer = setInterval(()=> {
@@ -108,5 +115,5 @@ document.addEventListener('keydown', function(e) {
 			}, 1200);
 		}
 	}
-});
+}
 activity("menu");
