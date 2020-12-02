@@ -1,8 +1,8 @@
 var mole = document.getElementsByClassName('mole');
-var x = 0, y = 0, timer, lives, score, rand, repeatTimer, highScore = 0, isPressed = true;
-function start() {
+var x = 0, y = 0, timer, lives, score, rand, repeatTimer, highScore = 0, canAttack;
+function initialize() {
 	activity("hide");
-	isPressed = false;
+	canAttack = true;
 	highScore = parseInt(document.cookie.split("=")[1]);
 	highScore = isNaN(highScore)? 0: highScore;
 	document.getElementById('highscore').innerText = "High Score: "+highScore;
@@ -50,14 +50,14 @@ function activity(screen) {
 	let innerContent;
 	if(screen == "menu") {
 		innerContent = `<h2>Whack A Mole</h2>
-						<button class="btn-green" onclick="start()">Start</button>`;
+						<button class="btn-green" onclick="initialize()">Start</button>`;
 	}
 	else if(screen == "hide") {
 		scrn.style.display = "none";
 	}
 	else {
 		innerContent = `<h2>Game Over</h2>
-						<button class="btn-green" onclick="start()">Start Again?</button>`;
+						<button class="btn-green" onclick="initialize()">Start Again?</button>`;
 		saveScore();
 	}
 	document.getElementById('screen').innerHTML = innerContent;
@@ -69,45 +69,46 @@ function saveScore() {
 	}
 }
 
-function animator(holeIndex, startFrame, endFrame) {
-	let xy = getFrameXY(startFrame);
-	animated = false;
+function animator(holeIndex, initializeFrame, endFrame) {
+	let xy = getFrameXY(initializeFrame);
 	clearTimeout(timer);
-	startFrame++;
-	timer = setTimeout(()=>animator(holeIndex, startFrame, endFrame), 200);
-	if(startFrame > endFrame) {
+	initializeFrame++;
+	timer = setTimeout(()=>animator(holeIndex, initializeFrame, endFrame), 200);
+	if(initializeFrame > endFrame) {
 		clearTimeout(timer);
 		mole[holeIndex].style.backgroundPosition = '0px 0px';
 		rand = Math.floor(Math.random()*9);
-		isPressed = false;
-		return animated = true;
+		canAttack = true;
+		return true;
 	}
 	else {
 		mole[holeIndex].style.backgroundPosition = -xy[0]+'px '+ -xy[1]+'px';
-		startFrame++;
-		return animated = false;
+		initializeFrame++;
+		return false;
 	}
 }
 function onTap(id) {
-	attack(id);
+	if(canAttack) {
+		attack(id);
+	}
+	canAttack = false;
 }
 
 document.addEventListener('keydown', function(e) {
 	let key = e.key;
 	let keyMap = [6, 7, 8, 3, 4, 5, 0, 1, 2];
-	attack(keyMap[key - 1]);
-	
+	if(canAttack)
+		attack(keyMap[key - 1]);
+	canAttack = false;
 });
 function attack(index) {
-	if((index == rand) && !isPressed) {
-		isPressed = true;
+	if(index == rand) {
 		hit(rand);
 		repeatTimer = setInterval(()=> {
 			show(rand);
 		}, 1200);
 	}
-	else if(!isPressed){
-		isPressed = true;
+	else {
 		escaped(rand);
 		if(lives >= 0) {
 			repeatTimer = setInterval(()=> {
